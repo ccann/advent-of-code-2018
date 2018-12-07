@@ -67,10 +67,10 @@ Step F must be finished before step E can begin.")
 
 (defn job-done?
   [job]
-  (= (:time job) (:spent job)))
+  (and (some? job)
+       (= (:time job) (:spent job))))
 
-
-
+;; i'm not proud of this
 (defn build-sleigh
   [dag]
   (let [-available    (sort (map first (filter no-parents? dag)))
@@ -82,18 +82,17 @@ Step F must be finished before step E can begin.")
       (if (and (empty? avail) (every? nil? (map second workers)))
         tick
         (let [workers        (into {} (for [[w job] workers]
-                                        (if job
-                                          (let [job (update job :spent inc)]
-                                            (if (job-done? job)
-                                              (do (swap! done conj (:step job))
-                                                  (println "done!" (:step job))
-                                                  [w nil])
-                                              [w job]))
-                                          [w job])))
+                                        (let [job (when job (update job :spent inc))]
+                                          (if (job-done? job)
+                                            (do (swap! done conj (:step job))
+                                                (println "done!" (:step job))
+                                                [w nil])
+                                            [w job]))))
               free-workers   (filter (comp nil? second) workers)
               ;; make as many assignments as there are free workers or available steps
               assignments    (->> (filter parents-done? avail)
                                   (sort)
+                                  (map new-job)
                                   (map vector (keys free-workers))
                                   (into {}))
               _              (when (seq assignments)
@@ -113,6 +112,4 @@ Step F must be finished before step E can begin.")
                  (merge workers assignments)))))))
 
 
-(defn solve [] (dec (build-sleigh DAG)))
-
-#_(solve)
+(defn solve-2 [] (dec (build-sleigh DAG)))
