@@ -105,8 +105,8 @@ position=<-3,  6> velocity=< 2, -1>")
           (recur ps (inc i)))))))
 
 
-(def g (make-graph @points))
-(tick g)
-(display g 0 0)
+#_(def g (make-graph @points))
+#_(tick g)
+#_(display g 0 0)
 
 (set! *print-length* 100000)

@@ -9,3 +9,11 @@
   (into {} (remove nil? (map (fn [[k v]] (when (pred v)
                                            [k v]))
                              m))))
+
+
+(defn all-pairs
+  [xs ys]
+  (let [v (transient [])]
+    (doseq [x xs, y ys]
+      (conj! v [x y]))
+    (persistent! v)))
